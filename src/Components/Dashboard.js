@@ -1,4 +1,4 @@
- import * as React from 'react';
+import * as React from 'react';
 import PropTypes from 'prop-types';
 import { createTheme } from '@mui/material/styles';
 import SensorsIcon from '@mui/icons-material/Sensors';
@@ -136,6 +136,11 @@ function DeviceMetricsSummary({ deviceId }) {
 }
 
 function TimeSeriesChart({ data }) {
+  const chartData = data.map(item => ({
+    ...item,
+    timestamp: new Date(item.timestamp)
+  }));
+
   const chartOptions = {
     chart: {
       type: 'line',
@@ -147,8 +152,11 @@ function TimeSeriesChart({ data }) {
     markers: { size: 4 },
     xaxis: {
       type: 'datetime',
-      categories: data.map(item => item.timestamp),
-      labels: { formatter: value => new Date(value).toLocaleString() }
+      labels: {
+        formatter: function(value) {
+          return new Date(value).toLocaleString();
+        }
+      }
     },
     yaxis: [
       { title: { text: 'Temperature (°C)' } },
@@ -165,10 +173,34 @@ function TimeSeriesChart({ data }) {
   };
 
   const chartSeries = [
-    { name: 'Temperature', data: data.map(item => ({ x: item.timestamp, y: item.temperature })) },
-    { name: 'Humidity', data: data.map(item => ({ x: item.timestamp, y: item.humidity })) },
-    { name: 'Pressure', data: data.map(item => ({ x: item.timestamp, y: item.pressure })) },
-    { name: 'CO2', data: data.map(item => ({ x: item.timestamp, y: item.co2 })) }
+    { 
+      name: 'Temperature', 
+      data: chartData.map(item => ({
+        x: item.timestamp,
+        y: item.temperature
+      })) 
+    },
+    { 
+      name: 'Humidity', 
+      data: chartData.map(item => ({
+        x: item.timestamp,
+        y: item.humidity
+      })) 
+    },
+    { 
+      name: 'Pressure', 
+      data: chartData.map(item => ({
+        x: item.timestamp,
+        y: item.pressure
+      })) 
+    },
+    { 
+      name: 'CO2', 
+      data: chartData.map(item => ({
+        x: item.timestamp,
+        y: item.co2
+      })) 
+    }
   ];
 
   return <ReactApexChart options={chartOptions} series={chartSeries} type="line" height={350} />;
@@ -187,7 +219,10 @@ function DeviceDetailView({ deviceId }) {
         setLoading(true);
         const [device, timeSeries] = await Promise.all([
           devicesDataSource.getOne(deviceId),
-          timeSeriesDataSource.getMany({ deviceId })
+          timeSeriesDataSource.getMany({ 
+            deviceId,
+            paginationModel: { page: 0, pageSize: 10 }
+          })
         ]);
         setDeviceDetails(device);
         setTimeSeriesData(timeSeries.items);
@@ -234,6 +269,7 @@ function DeviceDetailView({ deviceId }) {
         <Crud
           dataSource={devicesDataSource}
           dataSourceCache={devicesCache}
+          getRowId={(row) => row.id || row.device_id}
           rootPath="/devices"
           mode="detail"
           id={deviceId}
@@ -252,12 +288,18 @@ function DeviceDetailView({ deviceId }) {
         <Crud
           dataSource={{
             ...timeSeriesDataSource,
-            getMany: () => timeSeriesDataSource.getMany({ deviceId }),
+            getMany: (params) => timeSeriesDataSource.getMany({ 
+              deviceId,
+              ...params,
+              paginationModel: params.paginationModel || { page: 0, pageSize: 10 }
+            }),
             createOne: (data) => timeSeriesDataSource.createOne(deviceId, data),
           }}
+          getRowId={(row) => row.id || `${deviceId}-${new Date(row.timestamp).getTime()}`}
           rootPath="/devices"
           mode="list"
           hideToolbar={false}
+          initialPageSize={10}
         />
       </TabPanel>
     </Box>
@@ -291,8 +333,12 @@ export default function Dashboard(props) {
             <Crud
               dataSource={devicesDataSource}
               dataSourceCache={devicesCache}
+              getRowId={(row) => row.id || row.device_id}
               rootPath="/devices"
               initialPageSize={10}
+              disableServerPagination={true}
+              disableServerFiltering={true}
+              disableServerSorting={true}
               defaultValues={{ 
                 device_id: 1111,
                 building_name: 'Main Office',
