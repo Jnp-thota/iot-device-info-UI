@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://p2j8b8o7k0.execute-api.us-east-1.amazonaws.com/dev/';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://p2j8b8o7k0.execute-api.us-east-1.amazonaws.com/dev';
 
 // Helper function for making API requests
 async function makeApiRequest(endpoint, method = 'GET', body = null) {
@@ -8,8 +8,8 @@ async function makeApiRequest(endpoint, method = 'GET', body = null) {
     // Uncomment if using API keys
     // 'x-api-key': process.env.REACT_APP_API_KEY,
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Origin': 'http://localhost:3000/',
-    'Access-Control-Allow-Methods': 'GET'
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE',
   };
 
   // Uncomment if using AWS Cognito authentication
