@@ -1,4 +1,4 @@
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://p2j8b8o7k0.execute-api.us-east-1.amazonaws.com/dev/';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'https://p2j8b8o7k0.execute-api.us-east-1.amazonaws.com/dev';
 
 // Helper function for making API requests
 async function makeApiRequest(endpoint, method = 'GET', body = null) {
