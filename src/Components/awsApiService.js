@@ -8,7 +8,7 @@ async function makeApiRequest(endpoint, method = 'GET', body = null) {
     // Uncomment if using API keys
     // 'x-api-key': process.env.REACT_APP_API_KEY,
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Origin': 'http://localhost:3000/',
+    'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': 'GET'
   };
 
