@@ -7,7 +7,7 @@ async function makeApiRequest(endpoint, method = 'GET', body = null) {
     'Content-Type': 'application/json',
     // Uncomment if using API keys
     // 'x-api-key': process.env.REACT_APP_API_KEY,
-    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Allow-Headers': '*',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Methods': '*'
   };
