@@ -11,6 +11,8 @@ import { useDemoRouter } from '@toolpad/core/internal';
 import { Box, Tabs, Tab, Typography, Paper, Grid, CircularProgress, Alert } from '@mui/material';
 import ReactApexChart from 'react-apexcharts';
 import { devicesDataSource, timeSeriesDataSource } from './dataSources';
+import SummaryPage from './SummaryPage';
+import AssessmentIcon from '@mui/icons-material/Assessment';
 
 const NAVIGATION = [
   {
@@ -18,6 +20,12 @@ const NAVIGATION = [
     title: 'IoT Sensor Devices',
     icon: <SensorsIcon />,
     pattern: 'devices{/:deviceId}*',
+  },
+  {
+    segment: 'summary',
+    title: 'Device Summary',
+    icon: <AssessmentIcon />, // Add this import from @mui/icons-material
+    pattern: 'summary',
   },
 ];
 
@@ -321,34 +329,40 @@ export default function Dashboard(props) {
   }, [router.pathname]);
 
   const deviceId = matchPath('/devices/:deviceId', router.pathname) || 
-                   matchPath('/devices/:deviceId/edit', router.pathname);
+                  matchPath('/devices/:deviceId/edit', router.pathname);
 
   return (
     <AppProvider navigation={NAVIGATION} router={router} theme={demoTheme} window={demoWindow}>
       <DashboardLayout defaultSidebarCollapsed>
-        <PageContainer title={title}>
-          {deviceId ? (
-            <DeviceDetailView deviceId={deviceId} />
-          ) : (
-            <Crud
-              dataSource={devicesDataSource}
-              dataSourceCache={devicesCache}
-              getRowId={(row) => row.id || row.device_id}
-              rootPath="/devices"
-              initialPageSize={10}
-              disableServerPagination={true}
-              disableServerFiltering={true}
-              disableServerSorting={true}
-              defaultValues={{ 
-                device_id: 1111,
-                building_name: 'Main Office',
-                floor: 1,
-                zone: 'Main Zone',
-                room_type: 'Office'
-              }}
-            />
-          )}
-        </PageContainer>
+        {router.pathname === '/summary' ? (
+          <PageContainer title="Device Summary">
+            <SummaryPage />
+          </PageContainer>
+        ) : (
+          <PageContainer title={title}>
+            {deviceId ? (
+              <DeviceDetailView deviceId={deviceId} />
+            ) : (
+              <Crud
+                dataSource={devicesDataSource}
+                dataSourceCache={devicesCache}
+                getRowId={(row) => row.id || row.device_id}
+                rootPath="/devices"
+                initialPageSize={10}
+                disableServerPagination={true}
+                disableServerFiltering={true}
+                disableServerSorting={true}
+                defaultValues={{ 
+                  device_id: 1111,
+                  building_name: 'Main Office',
+                  floor: 1,
+                  zone: 'Main Zone',
+                  room_type: 'Office'
+                }}
+              />
+            )}
+          </PageContainer>
+        )}
       </DashboardLayout>
     </AppProvider>
   );

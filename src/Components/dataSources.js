@@ -3,7 +3,7 @@ import { devicesApi, timeSeriesApi } from './awsApiService';
 const applyClientSideOperations = (data, { 
   filterModel = {}, 
   sortModel = [], 
-  paginationModel = { page: 0, pageSize: 10 }
+  paginationModel = { page: 0, pageSize: 10 },
 }) => {
   // Filtering
   let filteredData = [...data];
@@ -13,7 +13,7 @@ const applyClientSideOperations = (data, {
         if (!filter.field || filter.value == null) return true;
         const itemValue = item[filter.field];
         const filterValue = filter.value.toString().toLowerCase();
-        
+
         switch (filter.operator) {
           case 'contains': return String(itemValue).toLowerCase().includes(filterValue);
           // eslint-disable-next-line eqeqeq
@@ -42,17 +42,17 @@ const applyClientSideOperations = (data, {
   // Pagination
   const start = paginationModel.page * paginationModel.pageSize;
   const end = start + paginationModel.pageSize;
-  
+
   return {
     items: filteredData.slice(start, end),
-    itemCount: filteredData.length
+    itemCount: filteredData.length,
   };
 };
 
 const processTimeSeriesData = (data) => {
   return data.map(item => ({
     ...item,
-    timestamp: new Date(item.timestamp).toISOString()
+    timestamp: new Date(item.timestamp).toISOString(),
   }));
 };
 
@@ -66,7 +66,7 @@ export const devicesDataSource = {
     { field: 'user_notes', headerName: 'Notes', flex: 1 },
     { field: 'room_type', headerName: 'Room Type', flex: 1 },
   ],
-  
+
   getMany: async (params) => {
     try {
       const allDevices = await devicesApi.getAll();
@@ -89,8 +89,7 @@ export const devicesDataSource = {
 
   createOne: async (data) => {
     try {
-      // Remove id before sending to API
-      const { id, ...apiData } = data;
+      const { id, ...apiData } = data; // Remove id before sending to API
       const result = await devicesApi.create(apiData);
       return { id: result.id || result.device_id, ...result };
     } catch (error) {
@@ -101,8 +100,7 @@ export const devicesDataSource = {
 
   updateOne: async (deviceId, data) => {
     try {
-      // Remove id before sending to API
-      const { id, ...apiData } = data;
+      const { id, ...apiData } = data; // Remove id before sending to API
       const result = await devicesApi.update(deviceId, apiData);
       return { id: result.id || result.device_id, ...result };
     } catch (error) {
@@ -144,7 +142,7 @@ export const timeSeriesDataSource = {
       const processedData = processTimeSeriesData(response);
       return applyClientSideOperations(processedData, { 
         ...params,
-        paginationModel
+        paginationModel,
       });
     } catch (error) {
       console.error(`Failed to fetch time series for device ${deviceId}:`, error);
@@ -154,16 +152,15 @@ export const timeSeriesDataSource = {
 
   createOne: async (deviceId, data) => {
     try {
-      // Remove id before sending to API
-      const { id, ...apiData } = data;
+      const { id, ...apiData } = data; // Remove id before sending to API
       const result = await timeSeriesApi.create({ 
         ...apiData, 
         device_id: deviceId,
-        timestamp: new Date(data.timestamp).toISOString()
+        timestamp: new Date(data.timestamp).toISOString(),
       });
       return { 
         id: result.id || `${deviceId}-${new Date(result.timestamp).getTime()}`,
-        ...result 
+        ...result,
       };
     } catch (error) {
       console.error('Failed to create time series entry:', error);
@@ -173,8 +170,7 @@ export const timeSeriesDataSource = {
 
   updateOne: async (id, data) => {
     try {
-      // Remove id before sending to API
-      const { id: _, ...apiData } = data;
+      const { id: _, ...apiData } = data; // Remove id before sending to API
       return await timeSeriesApi.update(id, apiData);
     } catch (error) {
       console.error(`Failed to update time series entry ${id}:`, error);
