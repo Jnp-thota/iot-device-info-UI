@@ -1,5 +1,6 @@
 import React from 'react';
 import { Box, Paper, Typography, Grid, CircularProgress, Alert } from '@mui/material';
+import ReactApexChart from 'react-apexcharts';
 import { summaryApi } from './awsApiService';
 
 const DeviceSummary = () => {
@@ -29,103 +30,178 @@ const DeviceSummary = () => {
 
   // Calculate total devices
   const totalDevices = summaryData.buildings.reduce(
-    (sum, building) => sum + building.device_count,
+    (sum, building) => sum + building.device_count, 
     0
   );
 
-  return (
-    <Box sx={{ mb: 4 }}>
-      <Typography variant="h6" gutterBottom>
-        Device Distribution Summary
-      </Typography>
+  // Chart 1: Buildings Distribution (Horizontal Bar)
+  const buildingsChart = {
+    series: [{
+      data: summaryData.buildings.map(b => b.device_count)
+    }],
+    options: {
+      chart: {
+        type: 'bar',
+        height: 350
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 4,
+          horizontal: true,
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      xaxis: {
+        categories: summaryData.buildings.map(b => b.building_name),
+        title: {
+          text: 'Number of Devices'
+        }
+      },
+      colors: ['#3f51b5']
+    }
+  };
 
-      {/* Total Devices Card */}
-      <Grid container spacing={2} sx={{ mb: 3 }}>
+  // Chart 2: Floors Distribution (Donut)
+  const floorsChart = {
+    series: summaryData.floors.map(f => f.device_count),
+    options: {
+      chart: {
+        type: 'donut',
+      },
+      labels: summaryData.floors.map(f => `Floor ${f.floor}`),
+      legend: {
+        position: 'bottom'
+      },
+      responsive: [{
+        breakpoint: 480,
+        options: {
+          chart: {
+            width: 200
+          },
+          legend: {
+            position: 'bottom'
+          }
+        }
+      }],
+      colors: ['#4caf50', '#ff9800', '#e91e63', '#00bcd4', '#9c27b0']
+    }
+  };
+
+  // Chart 3: Room Types (Stacked Column)
+  const roomTypesChart = {
+    series: [{
+      name: 'Devices',
+      data: summaryData.room_types.map(r => r.device_count)
+    }],
+    options: {
+      chart: {
+        type: 'bar',
+        height: 350,
+        stacked: true
+      },
+      plotOptions: {
+        bar: {
+          borderRadius: 4,
+          columnWidth: '60%',
+        }
+      },
+      xaxis: {
+        categories: summaryData.room_types.map(r => r.room_type),
+        labels: {
+          rotate: -45
+        }
+      },
+      yaxis: {
+        title: {
+          text: 'Number of Devices'
+        }
+      },
+      dataLabels: {
+        enabled: false
+      },
+      colors: ['#2196f3']
+    }
+  };
+
+  return (
+    <Box sx={{ p: 3 }}>
+      {/* Overview Cards */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Paper sx={{ p: 2, textAlign: 'center', height: '100%' }}>
-            <Typography variant="subtitle1">Total Devices</Typography>
-            <Typography variant="h4">{totalDevices}</Typography>
+          <Paper sx={{ p: 3, textAlign: 'center' }} elevation={3}>
+            <Typography variant="h6">Total Devices</Typography>
+            <Typography variant="h3" sx={{ mt: 1 }}>{totalDevices}</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper sx={{ p: 3, textAlign: 'center' }} elevation={3}>
+            <Typography variant="h6">Buildings</Typography>
+            <Typography variant="h3" sx={{ mt: 1 }}>{summaryData.buildings.length}</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper sx={{ p: 3, textAlign: 'center' }} elevation={3}>
+            <Typography variant="h6">Floors</Typography>
+            <Typography variant="h3" sx={{ mt: 1 }}>{summaryData.floors.length}</Typography>
+          </Paper>
+        </Grid>
+        <Grid item xs={12} sm={6} md={3}>
+          <Paper sx={{ p: 3, textAlign: 'center' }} elevation={3}>
+            <Typography variant="h6">Room Types</Typography>
+            <Typography variant="h3" sx={{ mt: 1 }}>{summaryData.room_types.length}</Typography>
           </Paper>
         </Grid>
       </Grid>
 
-      {/* Buildings Section */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          By Building
-        </Typography>
-        <Grid container spacing={2}>
-          {summaryData.buildings.map((building) => (
-            <Grid
-              item
-              xs={6}
-              sm={4}
-              md={3}
-              lg={2}
-              key={`building-${building.building_name}`}
-            >
-              <Paper sx={{ p: 2, textAlign: 'center', height: '100%' }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                  {building.building_name}
-                </Typography>
-                <Typography variant="h5">{building.device_count}</Typography>
-              </Paper>
-            </Grid>
-          ))}
+      {/* Charts Section */}
+      <Grid container spacing={3}>
+        {/* Buildings Chart */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Devices by Building
+            </Typography>
+            <ReactApexChart 
+              options={buildingsChart.options} 
+              series={buildingsChart.series} 
+              type="bar" 
+              height={350} 
+            />
+          </Paper>
         </Grid>
-      </Box>
 
-      {/* Floors Section */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          By Floor
-        </Typography>
-        <Grid container spacing={2}>
-          {summaryData.floors.map((floor) => (
-            <Grid
-              item
-              xs={6}
-              sm={4}
-              md={3}
-              lg={2}
-              key={`floor-${floor.floor}`}
-            >
-              <Paper sx={{ p: 2, textAlign: 'center', height: '100%' }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                  Floor {floor.floor}
-                </Typography>
-                <Typography variant="h5">{floor.device_count}</Typography>
-              </Paper>
-            </Grid>
-          ))}
+        {/* Floors Chart */}
+        <Grid item xs={12} md={6}>
+          <Paper elevation={3} sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Devices by Floor
+            </Typography>
+            <ReactApexChart 
+              options={floorsChart.options} 
+              series={floorsChart.series} 
+              type="donut" 
+              height={350} 
+            />
+          </Paper>
         </Grid>
-      </Box>
 
-      {/* Room Types Section */}
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="subtitle1" gutterBottom sx={{ fontWeight: 'bold' }}>
-          By Room Type
-        </Typography>
-        <Grid container spacing={2}>
-          {summaryData.room_types.map((room) => (
-            <Grid
-              item
-              xs={6}
-              sm={4}
-              md={3}
-              lg={2}
-              key={`room-${room.room_type}`}
-            >
-              <Paper sx={{ p: 2, textAlign: 'center', height: '100%' }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                  {room.room_type}
-                </Typography>
-                <Typography variant="h5">{room.device_count}</Typography>
-              </Paper>
-            </Grid>
-          ))}
+        {/* Room Types Chart */}
+        <Grid item xs={12}>
+          <Paper elevation={3} sx={{ p: 2 }}>
+            <Typography variant="h6" gutterBottom>
+              Devices by Room Type
+            </Typography>
+            <ReactApexChart 
+              options={roomTypesChart.options} 
+              series={roomTypesChart.series} 
+              type="bar" 
+              height={350} 
+            />
+          </Paper>
         </Grid>
-      </Box>
+      </Grid>
     </Box>
   );
 };
