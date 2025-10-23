@@ -1,52 +1,75 @@
-import React from 'react';
-import { createTheme, ThemeProvider, CssBaseline } from '@mui/material';
-import Dashboard from './Components/Dashboard';
-import { AuthProvider, useAuth } from 'react-oidc-context';
+// App.js
+import React from "react";
+import { useAuth } from "react-oidc-context";
+import { createTheme, ThemeProvider, CssBaseline, Button, CircularProgress } from "@mui/material";
+import Dashboard from "./Components/Dashboard";
 
-// Configure Cognito OIDC
-const cognitoAuthConfig = {
-  authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_wHau8EIYF", // replace with your user pool authority
-  client_id: "39l93as6a8smtn5o7nj2hovf2s", // replace with your App Client ID
-  redirect_uri: "https://main.d3hy3l4nr6c3jq.amplifyapp.com", // your Amplify app URL
-  response_type: "code",
-  scope: "phone openid email profile",
-};
-
-// Create MUI theme
+// Create a theme
 const theme = createTheme({
   palette: {
-    primary: { main: '#1976d2' },
-    secondary: { main: '#dc004e' },
+    primary: { main: "#1976d2" },
+    secondary: { main: "#dc004e" },
   },
 });
 
-// A wrapper component to handle auth logic
-function AppContent() {
+function App() {
   const auth = useAuth();
 
-  if (auth.isLoading) return <div>Loading...</div>;
-  if (auth.error) return <div>Error: {auth.error.message}</div>;
+  // Cognito logout redirect (replace placeholders)
+  const signOutRedirect = () => {
+    const clientId = "3osalugng6n9enq19uphjp2kvo"; // ✅ your Cognito app client ID
+    const logoutUri = "https://main.d3hy3l4nr6c3jq.amplifyapp.com"; // ✅ your app URL after logout
+    const cognitoDomain = "https://us-east-11hx6hbld1.auth.us-east-1.amazoncognito.com"; // ✅ replace this
+    window.location.href = `${cognitoDomain}/logout?client_id=${clientId}&logout_uri=${encodeURIComponent(logoutUri)}`;
+  };
 
-  if (!auth.isAuthenticated) {
-    return <button onClick={() => auth.signinRedirect()}>Sign in</button>;
+  if (auth.isLoading) {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", height: "100vh" }}>
+          <CircularProgress />
+        </div>
+      </ThemeProvider>
+    );
+  }
+
+  if (auth.error) {
+    return (
+      <ThemeProvider theme={theme}>
+        <CssBaseline />
+        <div style={{ textAlign: "center", marginTop: "2rem" }}>
+          <h3>Error: {auth.error.message}</h3>
+          <Button variant="contained" onClick={() => auth.signinRedirect()}>
+            Try Again
+          </Button>
+        </div>
+      </ThemeProvider>
+    );
   }
 
   return (
-    <div style={{ minHeight: '100vh' }}>
-      <button onClick={() => auth.removeUser()}>Sign out</button>
-      <Dashboard />
-    </div>
-  );
-}
-
-function App() {
-  return (
-    <AuthProvider {...cognitoAuthConfig}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <AppContent />
-      </ThemeProvider>
-    </AuthProvider>
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <div className="App" style={{ minHeight: "100vh" }}>
+        {auth.isAuthenticated ? (
+          <>
+            <Dashboard />
+            <div style={{ position: "absolute", top: 10, right: 10 }}>
+              <Button variant="contained" color="secondary" onClick={() => signOutRedirect()}>
+                Sign Out
+              </Button>
+            </div>
+          </>
+        ) : (
+          <div style={{ textAlign: "center", marginTop: "20%" }}>
+            <Button variant="contained" color="primary" onClick={() => auth.signinRedirect()}>
+              Sign In
+            </Button>
+          </div>
+        )}
+      </div>
+    </ThemeProvider>
   );
 }
 

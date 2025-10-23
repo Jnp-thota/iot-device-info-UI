@@ -22,13 +22,15 @@ import ReactDOM from "react-dom/client";
 import App from "./App";
 import './index.css';
 import { AuthProvider } from "react-oidc-context";
-import reportWebVitals from './reportWebVitals';
+// import reportWebVitals from './reportWebVitals';
 const cognitoAuthConfig = {
-  authority: "https://cognito-idp.us-east-1.amazonaws.com/us-east-1_wHau8EIYF",
-  client_id: "39l93as6a8smtn5o7nj2hovf2s",
+  authority: "https://us-east-11hx6hbld1.auth.us-east-1.amazoncognito.com",
+  client_id: "3osalugng6n9enq19uphjp2kvo",
   redirect_uri: "https://main.d3hy3l4nr6c3jq.amplifyapp.com",
+  post_logout_redirect_uri: "https://main.d3hy3l4nr6c3jq.amplifyapp.com",
   response_type: "code",
-  scope: "phone openid email",
+  scope: "openid email profile",
+  loadUserInfo: true,
 };
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
@@ -42,4 +44,4 @@ root.render(
 );
 
 
-reportWebVitals();
+// reportWebVitals();
