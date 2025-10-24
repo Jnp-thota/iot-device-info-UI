@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-iotdeviceinfoui-dev-2735b-authRole",
+      "UnauthRoleArn": "arn:aws:iam::061039759557:role/amplify-iotdeviceinfoui-dev-2735b-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::061039759557:role/amplify-iotdeviceinfoui-dev-2735b-authRole",
+      "Region": "us-east-1",
+      "DeploymentBucketName": "amplify-iotdeviceinfoui-dev-2735b-deployment",
+      "UnauthRoleName": "amplify-iotdeviceinfoui-dev-2735b-unauthRole",
+      "StackName": "amplify-iotdeviceinfoui-dev-2735b",
+      "StackId": "arn:aws:cloudformation:us-east-1:061039759557:stack/amplify-iotdeviceinfoui-dev-2735b/ef79cac0-b103-11f0-9483-125b8682e2d9",
+      "AmplifyAppId": "d1102mi6q7toar"
+    },
+    "categories": {
+      "auth": {
+        "iotdeviceinfoui4f0d37b4": {}
+      }
+    }
+  }
+}
